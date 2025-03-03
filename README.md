@@ -50,6 +50,22 @@ The project consists of the following components:
     - Optional noise simulation
     - Detailed results analysis and statistics
 
+- Tournament Class: Organises matches between multiple strategies
+    - Round-Robin tournament structure
+    - Comprehensive results aggregation
+    - Detailed rankings and statistics
+
+- Database Integration: Stores tournament results for persistence and analysis
+    - SQLAlchemy ORM models
+    - CRUD operations for tournament data
+    - Exporters for various formats (CSV, JSON, Excel)
+
+- Power BI Integration
+    - Optimised datasets for specific visualisation types
+    - Strategy comparison matrices
+    - Cooperation rate analysis
+    - Head-to-head performance metrics
+    
 ## Installation 
 
 ```bash
@@ -60,25 +76,52 @@ pip install -r requirements.txt
 
 ## Usage Example
 
+### Running a Basic Tournament
+
 ```python
 from src.game import Game
-from src.strategy import TitForTat, AlwaysDefect
-from src.player import Player
-from src.match import Match
+from src.strategy import TitForTat, AlwaysDefect, AlwaysCooperate
+from src.tournament import Tournament
 
-# Create players with different strategies
-player1 = Player(TitForTat())
-player2 = Player(AlwaysDefect())
+# Create a tournament with various strategies
+tournament = Tournament([
+    TitForTat(),
+    AlwaysDefect(),
+    AlwaysCooperate()
+])
 
-# Create and run a match
-match = Match(player1, player2, turns=100)
-results = match.play()
+# Run the tournament
+results = tournament.run()
 
-# View results
-print(f"Player 1 ({player1.name}) score: {results['player1']['score']}")
-print(f"Player 2 ({player2.name}) score: {results['player2']['score']}")
-print(f"Outcome: {results['outcome']}")
-print(f"Cooperation rates: {results['player1']['cooperation_rate']} vs {results['player2']['cooperation_rate']}")
+# Display results
+print("\nTournament Rankings:")
+for i, player in enumerate(results["players"]):
+    print(f"{i+1}. {player['name']} - Score: {player['avg_score']:.2f}")
+```
+
+### Saving Results to a Database
+
+```python
+from src.database.db_manager import DatabaseManager
+
+# Initialize database
+db_manager = DatabaseManager()
+db_manager.init_db()
+
+# Save tournament results
+tournament_id = db_manager.save_tournament(results)
+
+# Retrieve tournament data
+tournament_data = db_manager.get_tournament(tournament_id)
+```
+
+### Exporting for PowerBI
+
+```python
+from src.visualization.powerbi_prep import export_for_powerbi
+
+# Export tournament data for PowerBI
+files = export_for_powerbi(tournament_data, output_dir="powerbi_data")
 ```
 
 ## Testing 
